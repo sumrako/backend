@@ -10,25 +10,41 @@
 <body>
     <div class="container">
         <h1>График и таблица логов</h1>
-
-        <!-- Форма с выбором статус кода и типов запроса -->
+        <!-- Форма с выбором стартовой и конечной даты и фильтрами --> 
         <form class="mb-3">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="start_date">Выберите дату начала:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="2017-01-01">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="end_date">Выберите дату окончания:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="2019-01-01">
+                    </div>
+                </div>
+            </div>
+        <!-- Форма с выбором статус кода и типов запроса -->
+       
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="status_code">Выберите статус код:</label>
-                        <select class="form-control" id="status_code" name="status_code" multiple>
+                        <label for="status_codes">Выберите статус код:</label>
+                        <select class="form-control" id="status_codes" name="status_codes" multiple>
                             <option value="200">200 OK</option>
                             <option value="404">404 Not Found</option>
                             <option value="500">500 Internal Server Error</option>
+                            <option value="302">302 Moved Temporarily</option>
                             <!-- Добавьте другие статус коды по вашему усмотрению -->
                         </select>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="request_type">Выберите тип запроса:</label>
-                        <select class="form-control" id="request_type" name="request_type" multiple>
+                        <label for="request_types">Выберите тип запроса:</label>
+                        <select class="form-control" id="request_types" name="request_types" multiple>
                             <option value="GET">GET</option>
                             <option value="POST">POST</option>
                             <option value="DELETE">DELETE</option>
@@ -39,7 +55,6 @@
             </div>
             <button type="submit" class="btn btn-primary">Применить фильтры</button>
         </form>
-
         <div class="row">
             <div class="col-md-6">
                 <div id="log_histogram" style="height: 400px;"></div> <!-- Место для графика -->
@@ -71,10 +86,13 @@
                 </table>
             </div> <!-- Таблица с логами -->
         </div>
+        
     </div>
 
     <!-- JavaScript-код для создания графика ECharts -->
     <script>
+        var data = {{ data | tojson | safe }};
+        var histogramData = {};
         // Группируем данные по статус кодам
         for (var i = 0; i < data.length; i++) {
             var status = data[i].status_code;
@@ -86,9 +104,9 @@
         }
 
         // Преобразуем объект данных в массив
-        var data = [];
+        var data_hist = [];
         for (var status in histogramData) {
-            data.push(histogramData[status]);
+            data_hist.push(histogramData[status]);
         }
 
         // Конфигурация гистограммы
@@ -98,7 +116,7 @@
             yaxis: { title: 'Количество запросов' },
             barmode: 'stack' // Опция для столбчатой гистограммы
         };
-        Plotly.newPlot('log_histogram', data, layout);
+        Plotly.newPlot('log_histogram', data_hist, layout);
     </script>
 </body>
 </html>

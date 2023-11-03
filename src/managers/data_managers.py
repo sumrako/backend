@@ -1,12 +1,20 @@
-from .abstract_file import FileDataService
+from abc import ABC, abstractmethod
+from pydantic import BaseModel
 import pandas as pd
 from schemas.web_log import WebLogQuery, WebLogResponse
-from pydantic import BaseModel
-from datetime import datetime
-import re
 
-class LogService(FileDataService):
-    def get_data(self, query: WebLogQuery):
+
+class DataManager(ABC):
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    @abstractmethod
+    def read_data(query: BaseModel):
+        pass
+
+
+class CSVDataManger(DataManager):
+    def read_data(self, query: WebLogQuery):
         df = pd.read_csv(self.file_path)
 
         ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
@@ -28,8 +36,9 @@ class LogService(FileDataService):
         if query.start_date is not None:
              df = df.loc[df['Time'] >= query.start_date]
         if query.end_date is not None:
-             df = df.loc[df['Time'] < query.end_date]
-
+             df = df.loc[df['Time'] <= query.end_date]
+        
+        df = df.iloc[query.offset:query.offset+query.limit]
         response_list = [WebLogResponse(ip=row['IP'], \
                                         time=row['Time'], \
                                         request_type=row['Type'], \
@@ -37,3 +46,4 @@ class LogService(FileDataService):
                                         request_protocol=row['Protocol'], \
                                         status_code=row['Staus']).to_dict() for _, row in df.iterrows()]
         return response_list 
+

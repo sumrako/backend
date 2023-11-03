@@ -11,6 +11,9 @@ class WebLogQuery(BaseModel):
     request_types: Optional[List[str]]
     url: Optional[str]
     protocols: Optional[List[str]]
+    limit: int
+    offset: int
+
 
 class WebLogResponse(BaseModel):
     ip: IPv4Address

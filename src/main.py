@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.log_routes import log_router
 
